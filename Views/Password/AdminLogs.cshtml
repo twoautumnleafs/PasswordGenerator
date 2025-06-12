@@ -1,0 +1,36 @@
+@model List<PasswordGeneratorApp.Models.GeneratedPassword>
+
+@{
+    ViewData["Title"] = "Admin Password Logs";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+
+    @if (!Model.Any())
+    {
+        <p>No passwords have been generated yet.</p>
+    }
+    else
+    {
+        <table class="table table-bordered mt-3">
+            <thead class="table-light">
+            <tr>
+                <th>Generated At</th>
+                <th>Email</th>
+                <th>Password</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CreatedAt.ToString("g")</td>
+                    <td>@item.User?.Email</td>
+                    <td><code>@item.PasswordText</code></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>

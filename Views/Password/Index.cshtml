@@ -1,0 +1,92 @@
+@model PasswordGeneratorApp.Models.PasswordOptions
+
+@{
+    ViewData["Title"] = "Password Generator";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container mt-5 col-md-6 offset-md-3">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label">Password length:</label>
+            <input type="number" asp-for="Length" min="6" max="64" class="form-control" />
+        </div>
+
+        <label class="form-label">Include characters:</label>
+        <div class="dropdown mb-3">
+            <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" id="includeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Include: <span id="selectedChars">None</span>
+            </button>
+            <ul class="dropdown-menu p-3" aria-labelledby="includeDropdown" style="min-width: 100%;">
+                <li class="form-check">
+                    <input class="form-check-input char-checkbox" type="checkbox" asp-for="IncludeUppercase" id="uppercaseCheck" />
+                    <label class="form-check-label" for="uppercaseCheck">Uppercase letters (A-Z)</label>
+                </li>
+                <li class="form-check">
+                    <input class="form-check-input char-checkbox" type="checkbox" asp-for="IncludeLowercase" id="lowercaseCheck" />
+                    <label class="form-check-label" for="lowercaseCheck">Lowercase letters (a-z)</label>
+                </li>
+                <li class="form-check">
+                    <input class="form-check-input char-checkbox" type="checkbox" asp-for="IncludeNumbers" id="numbersCheck" />
+                    <label class="form-check-label" for="numbersCheck">Numbers (0-9)</label>
+                </li>
+                <li class="form-check">
+                    <input class="form-check-input char-checkbox" type="checkbox" asp-for="IncludeSymbols" id="symbolsCheck" />
+                    <label class="form-check-label" for="symbolsCheck">Special characters (!#$%)</label>
+                </li>
+            </ul>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Generate</button>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.GeneratedPassword))
+    {
+        <div class="alert alert-success mt-4">
+            <strong>Generated password:</strong> @Model.GeneratedPassword
+        </div>
+    }
+
+    <form method="post" asp-controller="Account" asp-action="Logout" class="mt-3">
+        <button type="submit" class="btn btn-danger w-100">Logout</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function updateSelectedChars() {
+        const checkboxes = document.querySelectorAll('.char-checkbox');
+        const selected = [];
+
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                switch (cb.id) {
+                    case 'uppercaseCheck': selected.push('A'); break;
+                    case 'lowercaseCheck': selected.push('a'); break;
+                    case 'numbersCheck': selected.push('1'); break;
+                    case 'symbolsCheck': selected.push('$'); break;
+                }
+            }
+        });
+
+        let displayText;
+        if (selected.length === 4) {
+            displayText = 'aA1$ (All)';
+        } else if (selected.length > 0) {
+            displayText = selected.join('');
+        } else {
+            displayText = 'None';
+        }
+
+        document.getElementById('selectedChars').textContent = displayText;
+    }
+
+    document.querySelectorAll('.char-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateSelectedChars);
+    });
+
+    updateSelectedChars();
+</script>
