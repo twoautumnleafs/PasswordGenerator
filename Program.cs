@@ -34,12 +34,18 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+// Применяем миграции базы данных при старте приложения
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 // Создание ролей и администратора при запуске
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
-    // Создаем роли
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     string[] roleNames = { "Admin", "User" };
 
@@ -52,7 +58,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Создаем администратора
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var adminEmail = "admin@example.com";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
@@ -65,7 +70,7 @@ using (var scope = app.Services.CreateScope())
             Email = adminEmail
         };
 
-        var createAdmin = await userManager.CreateAsync(adminUser, "admin1234"); // пароль: admin
+        var createAdmin = await userManager.CreateAsync(adminUser, "admin1234"); // пароль: admin1234
 
         if (createAdmin.Succeeded)
         {
@@ -74,7 +79,6 @@ using (var scope = app.Services.CreateScope())
     }
     else
     {
-        // Проверяем, есть ли роль Admin у пользователя
         var roles = await userManager.GetRolesAsync(adminUser);
         if (!roles.Contains("Admin"))
         {
